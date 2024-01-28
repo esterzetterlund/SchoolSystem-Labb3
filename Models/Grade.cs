@@ -14,6 +14,7 @@ public partial class Grade
     public int FkstudentId { get; set; }
 
     public int FkcourseId { get; set; }
+    public int? FkstaffId { get; set; }
 
     public virtual Course Fkcourse { get; set; } = null!;
 

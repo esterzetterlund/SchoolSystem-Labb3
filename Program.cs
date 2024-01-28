@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SchoolSystem_Labb3.Models;
 using System.Data.Entity;
 using System.Linq;
@@ -33,7 +34,10 @@ internal class Program
             Console.WriteLine("5) Get a list with all courses and the AverageGrade");   
             Console.WriteLine("6) Add new students");
             Console.WriteLine("7) Add new staffs");
-            Console.WriteLine("8) Exit");
+            Console.WriteLine("8) Show Count Of Staffs");
+            Console.WriteLine("9) View All Students");
+            Console.WriteLine("10) View Active Courses");
+            Console.WriteLine("11) Exit");
 
             // Läs in användarens val
             string choise = Console.ReadLine();
@@ -77,10 +81,17 @@ internal class Program
                     // Returnera true för att fortsätta loopen
                     return true;
                 case "8":
-                    // Returnera false för att avsluta loopen och programmet
+                    ShowCountOfStaffs(context);
+                    return true;
+                case "9":
+                    ViewStudent(context);
+                    return true;
+                case "10":
+                    ViewActiveCourses(context);
+                    return true;
+                case "11":
                     return false;
                 default:
-                    // Returnera true för att fortsätta loopen om användaren matar in ett ogiltigt val
                     return true;
             }
         }
@@ -144,7 +155,7 @@ internal class Program
         // Loopa igenom listan och skriv ut varje anställds information
         foreach (var p in Staffs)
         {
-            Console.WriteLine($"Id: {p.StaffId}, Name: {p.FirstName} {p.LastName}, Position: {p.Position}");
+            Console.WriteLine($"[Id: {p.StaffId}] ***** [Name: {p.FirstName} {p.LastName}] ***** [Position: {p.Position}] ***** [Employment Year: {p.EmploymentYear}] ***** [Department: {p.FKDepartmentId} ");
         }
 
         // Vänta på att användaren trycker på en tangent innan du återgår till menyn
@@ -243,6 +254,7 @@ internal class Program
         {
             Console.WriteLine($"Id: {e.StudentID}, Name: {e.FirstName} {e.LastName}, class: {e.FkclassId}");
         }
+        
         // Vänta på att användaren trycker på en tangent innan du återgår till menyn
         Console.WriteLine("Press any key to return to the menu.");
         Console.ReadKey();
@@ -406,8 +418,8 @@ internal class Program
     static void AddNewStaff(SchoolsystemContext context)
     {
         Console.Clear();
-            // Skriv ut ett meddelande till användaren
-            Console.WriteLine("Enter the details of a new employee:");
+        // Skriv ut ett meddelande till användaren
+        Console.WriteLine("Enter the details of a new employee:");
         Console.WriteLine("StaffID: (100>1000)");
         int staffID = int.Parse(Console.ReadLine());
 
@@ -423,13 +435,17 @@ internal class Program
         Console.Write("Position: ");
         string position = Console.ReadLine();
 
+        Console.WriteLine("DepartmentID: ");
+        int departmentid = int.Parse(Console.ReadLine());
+
         // Skapa ett nytt personalobjekt med de inmatade uppgifterna
         var staff = new Staff
         {
             StaffId = staffID,
             FirstName = firstname,
             LastName = lastname,
-            Position = position
+            Position = position,
+            FKDepartmentId = departmentid
         };
 
         // Lägg till det nya personalobjektet till kontexten
@@ -439,8 +455,71 @@ internal class Program
         context.SaveChanges();
 
         // Skriv ut ett bekräftelsemeddelande till användaren
-        Console.WriteLine($"Add {staff.StaffId} {staff.FirstName} {staff.LastName} to {staff.Position} in database.");
+        Console.WriteLine($"Add {staff.StaffId} {staff.FirstName} {staff.LastName} to {staff.Position} with department {staff.FKDepartmentId} in database.");
         Console.ReadKey();
+    }
+    static void ShowCountOfStaffs(SchoolsystemContext context)
+    {
+        Console.WriteLine("Wich department do you wanna see the count of staffs in?");
+        Console.WriteLine("1. Katten");
+        Console.WriteLine("2. Hunden");
+        string choise = Console.ReadLine();
+        List<Staff> staffs;
+        Console.Clear();
+        switch (choise)
+        {
+            case "1":
+                staffs = context.Staff.Where(s => s.FKDepartmentId == 1).ToList();
+                Console.WriteLine($"It is {staffs.Count} working in Katten");
+                Console.ReadKey();
+                break;
+            case "2":
+                staffs = context.Staff.Where(s => s.FKDepartmentId == 2).ToList();
+                Console.WriteLine($"It is {staffs.Count} working in Hunden");
+                Console.ReadKey();
+                break;
+            default:
+                break;
+        }
+    }
+
+    static void ViewStudent(SchoolsystemContext context)
+    {
+        Console.Clear();
+
+        // Deklarera en lista med elev
+        List<Student> students;
+        students = context.Students.ToList();
+
+        // Skriv ut antalet elever som hämtades
+        Console.WriteLine($"Here is all {students.Count} students in this school.");
+        Console.ReadKey();
+
+        // Loopa igenom listan och skriv ut varje elevs information
+        foreach (var e in students)
+        {
+            Console.WriteLine($"Id: {e.StudentID}, Name: {e.FirstName} {e.LastName}, class: {e.FkclassId}");
+        }
+
+        // Vänta på att användaren trycker på en tangent innan du återgår till menyn
+        Console.WriteLine("Press any key to return to the menu.");
+        Console.ReadKey();
+    }
+
+    static void ViewActiveCourses(SchoolsystemContext context)
+    {
+        Console.Clear();
+        var today = DateTime.Today;
+
+        var activeCourses = context.Courses.Where(c => c.StartDate <= today && c.EndDate >= today).ToList();
+        Console.WriteLine("All Active Courses:");
+        foreach (var c in activeCourses)
+        {
+            Console.WriteLine($"[Id: {c.CourseId}] ***** [Course Name: {c.CourseName}] ***** [Startdate: {c.StartDate}] ***** [Enddate: {c.EndDate}]");
+        }
+        Console.WriteLine("Press any key to return to the menu.");
+        Console.ReadKey();
+
     }
 
 }

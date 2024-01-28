@@ -11,6 +11,11 @@ public partial class Course
 
     public int Credit { get; set; }
 
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    
+
+
     public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();
 
     public virtual ICollection<StaffCourse> StaffCourses { get; set; } = new List<StaffCourse>();

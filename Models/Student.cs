@@ -12,6 +12,7 @@ public partial class Student
     public string? LastName { get; set; }
 
     public int? FkclassId { get; set; }
+    public DateTime? Pnumber { get; set; }
 
     public virtual Class? Fkclass { get; set; }
 

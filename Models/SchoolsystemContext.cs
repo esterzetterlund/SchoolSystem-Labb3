@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,9 +28,10 @@ public partial class SchoolsystemContext : DbContext
     public virtual DbSet<StaffCourse> StaffCourses { get; set; }
 
     public virtual DbSet<Student> Students { get; set; }
+    public virtual DbSet<Department> Departments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+
         => optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Schoolsystem;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -55,11 +57,23 @@ public partial class SchoolsystemContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.DepartmentId).HasName("PK_Department");
+            
+                entity.ToTable("Department");
+
+            entity.Property(e => e.DepartmentName)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Grade>(entity =>
         {
             entity.Property(e => e.GradeId).HasColumnName("GradeID");
             entity.Property(e => e.Dates).HasColumnType("datetime");
             entity.Property(e => e.FkcourseId).HasColumnName("FKCourseId");
+            entity.Property(e => e.FkstaffId).HasColumnName("FKStaffId");
             entity.Property(e => e.FkstudentId).HasColumnName("FKStudentId");
             entity.Property(e => e.Grade1)
                 .HasMaxLength(3)
@@ -84,15 +98,21 @@ public partial class SchoolsystemContext : DbContext
             entity.Property(e => e.StaffId)
                 .ValueGeneratedNever()
                 .HasColumnName("StaffID");
+            entity.Property(e => e.EmploymentYear).HasColumnType("datetime");
             entity.Property(e => e.FirstName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.FKDepartmentId)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("FKDepartmentId");
             entity.Property(e => e.LastName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Position)
                 .HasMaxLength(30)
                 .IsUnicode(false);
+
         });
 
         modelBuilder.Entity<StaffCourse>(entity =>
@@ -127,6 +147,7 @@ public partial class SchoolsystemContext : DbContext
             entity.Property(e => e.LastName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Pnumber).HasColumnName("PNumber");
 
             entity.HasOne(d => d.Fkclass).WithMany(p => p.Students)
                 .HasForeignKey(d => d.FkclassId)
